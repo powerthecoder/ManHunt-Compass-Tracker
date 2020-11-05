@@ -25,7 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.md_5.bungee.api.ChatColor;
 
 public class Main extends JavaPlugin implements Listener {
-	
+	   
 	// Create Cooldown Map
 	Map<String, Long> cooldowns = new HashMap<String, Long>();
 	
