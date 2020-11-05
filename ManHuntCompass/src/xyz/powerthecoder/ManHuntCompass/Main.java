@@ -1,6 +1,9 @@
 package xyz.powerthecoder.ManHuntCompass;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -70,8 +73,14 @@ public class Main extends JavaPlugin implements Listener {
 		ItemMeta meta = comp.getItemMeta();
 		
 		meta.setDisplayName("Player Compass");
-		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		
+		ArrayList<String> lore = new ArrayList<String>();
+		lore.add("Tracking: " + savedArgs);
+		lore.add(" ");
+		lore.add("Compass made for Manhunts");
+		lore.add("Developer: Leo Power");
+		meta.setLore(lore);
 		comp.setItemMeta(meta);
 		return comp;
 	}
@@ -90,11 +99,16 @@ public class Main extends JavaPlugin implements Listener {
 			Player target = Bukkit.getPlayer(savedArgs);
 			if (event.getAction() == Action.RIGHT_CLICK_AIR) {
 				// Check if player has cooldown
-				if (cooldowns.get(player.getName()) > System.currentTimeMillis()) {
-					long timeleft = (cooldowns.get(player.getName()) - System.currentTimeMillis() / 1000);
-					player.sendMessage(ChatColor.RED + "Cooldown in effect " + timeleft + " second(s)");
-					return;
+				if (cooldowns.containsKey(player.getName())) {
+					// Player is inside HashMap
+					if (cooldowns.get(player.getName()) > System.currentTimeMillis()) {
+						// still on cooldown
+						long timeleft = (cooldowns.get(player.getName()) - System.currentTimeMillis() / 1000);
+						player.sendMessage(ChatColor.RED + "Hook ready in " + timeleft + " second(s)");
+						return;
+					}
 				}
+				cooldowns.put(player.getName(), System.currentTimeMillis() + (10 * 1000));
 				// Run setCompassTarget()
 				setCompassTarget(target, player);
 			}
