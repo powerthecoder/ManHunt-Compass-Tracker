@@ -1,5 +1,7 @@
 package xyz.powerthecoder.ManHuntCompass;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
@@ -17,12 +19,14 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-
-
 import net.md_5.bungee.api.ChatColor;
 
 public class Main extends JavaPlugin implements Listener {
 	
+	// Create Cooldown Map
+	Map<String, Long> cooldowns = new HashMap<String, Long>();
+	
+	// Globaly Saved Arguments
 	private static String savedArgs;
 	public static String getArgs() {
 		return savedArgs;
@@ -40,24 +44,28 @@ public class Main extends JavaPlugin implements Listener {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (label.equalsIgnoreCase("track")) {
 			if (!(sender instanceof Player)) {
+				// sender is Console
 				sender.sendMessage("You need to be in game");
 				return true;
 			}
 			Player player = (Player) sender;
 			if (player.getInventory().firstEmpty() == -1) {
+				// Inventory Is Full
 				player.sendMessage("You inv is full");
 				return true;
 			}
+			// Give Compass
 			player.getInventory().addItem(getItem());
 			player.sendMessage(ChatColor.GOLD + "You have been given the compass!");
+			// Save Args
 			savedArgs = args[0];
-			Player target = Bukkit.getPlayer(args[0]);
 			player.sendMessage(ChatColor.GOLD + "Set tracking to " + args[0]);
 		}
 		return false;
 	}
 	
 	public ItemStack getItem() {
+		// Get a Compass
 		ItemStack comp = new ItemStack(Material.COMPASS);
 		ItemMeta meta = comp.getItemMeta();
 		
@@ -69,16 +77,25 @@ public class Main extends JavaPlugin implements Listener {
 	}
 	
 	public void setCompassTarget(Player target, Player player) {
+		// Set Compass Direction
 		Location loc = target.getLocation();
 		player.setCompassTarget(loc);
 	}
 	
 	@EventHandler()
 	public void onClick(PlayerInteractEvent event) {
+		// On Click
 		if (event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.COMPASS)) {
 			Player player = (Player) event.getPlayer();
 			Player target = Bukkit.getPlayer(savedArgs);
 			if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+				// Check if player has cooldown
+				if (cooldowns.get(player.getName()) > System.currentTimeMillis()) {
+					long timeleft = (cooldowns.get(player.getName()) - System.currentTimeMillis() / 1000);
+					player.sendMessage(ChatColor.RED + "Cooldown in effect " + timeleft + " second(s)");
+					return;
+				}
+				// Run setCompassTarget()
 				setCompassTarget(target, player);
 			}
 		}
