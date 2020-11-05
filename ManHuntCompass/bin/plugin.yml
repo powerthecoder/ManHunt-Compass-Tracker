@@ -1,0 +1,8 @@
+main: "xyz.powerthecoder.ManHuntCompass.Main"
+name: "ManHuntCompass"
+version: "1.0"
+api: "1.16"
+author: "Leo Power"
+
+commands:
+  track:
